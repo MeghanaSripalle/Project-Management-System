@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 $id = $_SESSION["manager_id"];
 
 // number of assigned projects
-$q = "SELECT * FROM Projects WHERE manager_id='$id'";
+$q = "SELECT DISTINCT manager_id FROM Assigned WHERE manager_id='$id'";
 $result = $conn->query($q);
 
 $projects = $result->num_rows;

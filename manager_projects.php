@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 $id = $_SESSION["manager_id"];
 
 // number of assigned projects
-$q = "SELECT * FROM Projects WHERE manager_id='$id'";
+$q = "SELECT DISTINCT manager_id FROM Assigned WHERE manager_id='$id'";
 $result = $conn->query($q);
 
 $projects = $result->num_rows;
@@ -194,7 +194,7 @@ function test_input($data) {
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if(isset($_POST["view"])){
                
-                 $sql = "SELECT * FROM Projects,Deadlines WHERE Projects.project_id = Deadlines.project_id AND Projects.manager_id='$id' ORDER BY Projects.project_id ASC";
+                 $sql = "SELECT * FROM Projects,Assigned WHERE Projects.project_id = Assigned.project_id AND Assigned.manager_id='$id' ORDER BY Projects.project_id ASC";
                  $result = $conn->query($sql);
                  
                  if ($result->num_rows > 0) {
@@ -275,7 +275,7 @@ function test_input($data) {
            </div>
         </div><!-- End Left side columns -->
         <div class="pagetitle">
-            <h1>Assign New Project to Employee</h1>
+            <h1>Create New Project</h1>
         </div>
         <div class="col-lg-6">
             <div class="row">
@@ -295,12 +295,12 @@ function test_input($data) {
                                     <input type="text" class="form-control" name="project_name" id="project_name" placeholder="Enter Project Name" maxlength=20 required>
                                 </div>
                             </div>
-                            <div class="row mb-3">
+                            <!-- <div class="row mb-3">
                                 <label for="emp_id" class="col-sm-2 col-form-label">Employee ID: </label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" name="emp_id" id="emp_id" placeholder="Enter Employee ID" required maxlength=5>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="row mb-3">
                                 <label for="deadline" class="col-sm-2 col-form-label">Deadline of the Project: </label>
                                 <div class="col-sm-10">
@@ -321,7 +321,7 @@ function test_input($data) {
                             </div>
                             <div class="row mb-3">
                                 <div class="col-sm-10">
-                                    <input  type="submit" class="btn btn-primary" value="Assign" name="insert" id="insert">
+                                    <input  type="submit" class="btn btn-primary" value="Create Project" name="insert" id="insert">
                                 </div>
                             </div>
                         </form>
@@ -331,25 +331,88 @@ function test_input($data) {
              
                              $project_id = test_input($_POST["project_id"]);
                              $project_name = test_input($_POST["project_name"]);
-                             $emp_id = test_input($_POST["emp_id"]);
                              $duedate = test_input($_POST["deadline"]);
                              $skills = test_input($_POST["skill"]);
                              $details = test_input($_POST["details"]);
             
                            
-                             $insert = "INSERT INTO Projects VALUES('$project_id','$project_name','$emp_id','$id','$skills','$details')";
+                             $insert = "INSERT INTO Projects VALUES('$project_id','$project_name','$id','$skills','$details','$duedate')";
                              $insert_result = $conn->query($insert);
 
                              if ($insert_result === TRUE) {
-                                $insert1 = "INSERT INTO Deadlines VALUES('$project_id','$duedate')";
-                                $insert1_result = $conn->query($insert1);
-                                if ($insert1_result == TRUE){
-                                    echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-                                    <i class='bi bi-check-circle me-1'></i>
-                                    The project has been assigned successfully!
-                                    <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-                                    </div>";
-                                }
+                              echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                              <i class='bi bi-check-circle me-1'></i>
+                              The project has been created successfully!
+                              <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+                              </div>";
+                               
+                               
+                              }else{
+                                echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                                <i class='bi bi-exclamation-octagon me-1'></i>
+                                There was some error while creating the project. Please try again!
+                                <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+                              </div>"; 
+                              }
+
+                              
+
+                             }
+                           
+                            }
+                        ?>
+                    </div>
+                </div>
+                
+
+            </div>
+        </div>
+
+        <div class="pagetitle">
+            <h1>Assign Project To Employee</h1>
+        </div>
+        <div class="col-lg-6">
+            <div class="row">
+                <div class="card">
+                    <div class="card-body">
+                         <h5 class="card-title">Enter the Project ID and Employee ID</h5>
+                         <form method="post" action="manager_projects.php">
+                            <div class="row mb-3">
+                                <label for="project_id" class="col-sm-2 col-form-label">Project ID: </label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="p_id" id="p_id" placeholder="Enter Project ID" maxlength=5 required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="emp_id" class="col-sm-2 col-form-label">Employee ID: </label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="emp_id" id="emp_id" placeholder="Enter Employee ID" required maxlength=5>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-10">
+                                    <input  type="submit" class="btn btn-primary" value="Assign" name="assign" id="assign">
+                                </div>
+                            </div>
+                        </form>
+                        <?php
+                           if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                            if(isset($_POST["assign"])){
+             
+                             $project_id = test_input($_POST["p_id"]);
+                             $emp_id = test_input($_POST["emp_id"]);
+            
+                           
+                             $assign = "INSERT INTO Assigned VALUES('$project_id','$id','$emp_id')";
+                             $ret = $conn->query($assign);
+
+                             if ($ret === TRUE) {
+                              echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+                              <i class='bi bi-check-circle me-1'></i>
+                              The project has been assigned successfully!
+                              <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
+                              </div>";
+                               
                               }else{
                                 echo "<div class='alert alert-danger alert-dismissible fade show' role='alert'>
                                 <i class='bi bi-exclamation-octagon me-1'></i>
@@ -382,7 +445,7 @@ function test_input($data) {
                 <form method="post" action="manager_projects.php">
                     <div class="row mb-3">
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" placeholder="Enter Project ID" name="p_id" id="p_id">
+                            <input type="text" class="form-control" placeholder="Enter Project ID" name="pid" id="pid">
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -398,18 +461,18 @@ function test_input($data) {
             if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if(isset($_POST["search_pid"])){
  
-                 $p_id = test_input($_POST["p_id"]);
+                 $p_id = test_input($_POST["pid"]);
 
                
-                 $q = "SELECT * FROM Projects,Employee WHERE Projects.emp_id = Employee.emp_id AND Projects.project_id='$p_id' ORDER BY Projects.project_id ASC";
+                 $q = "SELECT * FROM Projects,Assigned,Employee WHERE Projects.project_id = Assigned.project_id AND Assigned.emp_id = Employee.emp_id AND Projects.project_id='$p_id' ORDER BY Projects.project_id ASC";
                  $res1 = $conn->query($q);
                  
                  if ($res1->num_rows > 0) {
                     echo "</br><div class='card'><div class='card-body'>";
-                    echo"<table class='table table-bordered'><thead><tr><th scope='col'>Project ID</th><th scope='col'>Project Name</th><th scope='col'>Employee Name</th>";
+                    echo"<table class='table table-bordered'><thead><tr><th scope='col'>Project ID</th><th scope='col'>Project Name</th><th scope='col'>Prerequisites</th><th scope='col'>Description</th><th scope='col'>Deadline</th><th scope='col'>Employee Name</th>";
                     echo "<tbody>";
                     while($r1 = $res1->fetch_assoc()) {
-                      echo "<tr><th scope ='row'>".$r1["project_id"]."</th><td>".$r1["project_name"]."</td><td>".$r1["emp_name"]."</td></tr>";
+                      echo "<tr><th scope ='row'>".$r1["project_id"]."</th><td>".$r1["project_name"]."</td><td>".$r1["prereq"]."</td><td>".$r1["details"]."</td><td>".$r1["due_date"]."</td><td>".$r1["emp_name"]."</td></tr>";
                     }
                     echo "</tbody></table></div></div>";
                     

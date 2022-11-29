@@ -28,7 +28,7 @@ $date = date_format($date,"d/m/Y");
 $name = $_SESSION["name"];
 $post = $_SESSION["post"];
 
-$q3 = "SELECT * FROM Employee WHERE emp_id='$id'";
+$q3 = "SELECT DISTINCT emp_id FROM Assigned WHERE emp_id='$id'";
 $res2 = $conn->query($q3);
 
 if ($res2->num_rows > 0){
@@ -207,11 +207,11 @@ function test_input($data) {
             
                     
 
-                        $q2 = "SELECT * FROM Projects WHERE project_id='$project_id' AND emp_id='$id'";
+                        $q2 = "SELECT * FROM Assigned WHERE Assigned.project_id='$project_id' AND Assigned.emp_id='$id'";
                         $res2 = $conn->query($q2);
                         if($res2->num_rows > 0){
                             
-                            $q3 = "INSERT INTO Updates VALUES('$project_id','$updates','$date')";
+                            $q3 = "INSERT INTO Updates VALUES('$project_id','$id','$updates','$date')";
                             $res3 = $conn->query($q3);
                             if ($res3 == TRUE){
                             echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -222,7 +222,7 @@ function test_input($data) {
 
                             }else{
 
-                                $q4 = "UPDATE Updates SET updates='$updates' WHERE project_id='$project_id'";
+                                $q4 = "UPDATE Updates SET updates='$updates' WHERE project_id='$project_id' AND emp_id='$id'";
                                 $res4 = $conn->query($q4);
                                 if ($res4 == TRUE){
                                     echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
@@ -283,14 +283,14 @@ function test_input($data) {
                          $pro_id = test_input($_POST["pro_id"]);
         
                        
-                         $view = "SELECT * FROM Updates,Projects WHERE Updates.project_id = Projects.project_id AND Projects.project_id='$pro_id' AND Projects.emp_id='$id' ORDER BY Updates.update_date";
+                         $view = "SELECT * FROM Updates WHERE Updates.project_id='$pro_id' AND Updates.emp_id='$id' ORDER BY Updates.update_date";
                          $result = $conn->query($view);
 
                          if($result->num_rows > 0) {
 
                             echo "<div class='card'>";
                             echo "<div class='card-body'>";
-                            echo "<h5 class='card-title'>Recent Updates (with Dates)</h5><div class='activity'>";
+                            echo "<h5 class='card-title'>Recent Updates on Project ID ".$pro_id." (with Dates)</h5><div class='activity'>";
                             $arr = array("success","danger","primary","info","warning","muted");
                             while($row = $result->fetch_assoc()){
                                $i = rand(0,5);

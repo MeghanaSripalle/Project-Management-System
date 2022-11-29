@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 $id = $_SESSION["emp_id"];
 
 // number of assigned projects
-$q = "SELECT * FROM Projects WHERE emp_id='$id'";
+$q = "SELECT DISTINCT emp_id FROM Assigned WHERE emp_id='$id'";
 $result = $conn->query($q);
 
 $projects = $result->num_rows;
@@ -29,13 +29,13 @@ $date=date_create($curdate[wday]-$curdate[mday]-$curdate[year],timezone_open("As
 $date = date_format($date,"d/m/Y");
 
 // no of projects due today
-$q1 = "SELECT * FROM Projects,Deadlines WHERE  Projects.project_id = Deadlines.project_id AND Deadlines.due_date='$date' AND Projects.emp_id='$id'";
+$q1 = "SELECT * FROM Projects,Assigned WHERE  Projects.project_id = Assigned.project_id AND Projects.due_date='$date' AND Assigned.emp_id='$id'";
 $res = $conn->query($q1);
 
 $deadlines = $res->num_rows;
 
 //no of current projects
-$q2 = "SELECT * FROM Projects,Deadlines WHERE Projects.project_id = Deadlines.project_id AND Deadlines.due_date - '$date' >= 0 AND Projects.emp_id='$id'";
+$q2 = "SELECT * FROM Projects,Assigned WHERE Projects.project_id = Assigned.project_id AND Projects.due_date - '$date' >= 0 AND Assigned.emp_id='$id'";
 $res1 = $conn->query($q2);
 
 $current = $res1->num_rows;
@@ -197,7 +197,7 @@ function test_input($data) {
                 if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if(isset($_POST["due"])){
                 
-                    $sql = "SELECT * FROM Projects,Deadlines WHERE Projects.project_id = Deadlines.project_id AND Projects.emp_id='$id' AND Deadlines.due_date = '$date' ORDER BY Projects.project_id ASC";
+                    $sql = "SELECT * FROM Projects,Assigned WHERE  Projects.project_id = Assigned.project_id AND Projects.due_date='$date' AND Assigned.emp_id='$id' ORDER BY Projects.project_id ASC";
                     $result = $conn->query($sql);
                     
                     if ($result->num_rows > 0) {
@@ -243,7 +243,7 @@ function test_input($data) {
                 if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if(isset($_POST["current"])){
                 
-                    $sql1 = "SELECT * FROM Projects,Deadlines WHERE Projects.project_id = Deadlines.project_id AND Projects.emp_id='$id' AND Deadlines.due_date -'$date' >= 0 ORDER BY Projects.project_id ASC";
+                    $sql1 = "SELECT * FROM Projects,Assigned WHERE Projects.project_id = Assigned.project_id AND Projects.due_date - '$date' >= 0 AND Assigned.emp_id='$id' ORDER BY Projects.project_id ASC";
                     $res1 = $conn->query($sql1);
                     
                     if ($res1->num_rows > 0) {
@@ -290,7 +290,7 @@ function test_input($data) {
                 if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     if(isset($_POST["past"])){
                 
-                    $sql1 = "SELECT * FROM Projects,Deadlines WHERE Projects.project_id = Deadlines.project_id AND Projects.emp_id='$id' AND Deadlines.due_date -'$date' < 0 ORDER BY Projects.project_id ASC";
+                    $sql1 = "SELECT * FROM Projects,Assigned WHERE Projects.project_id = Assigned.project_id AND Assigned.emp_id='$id' AND Projects.due_date -'$date' < 0 ORDER BY Projects.project_id ASC";
                     $res1 = $conn->query($sql1);
                     
                     if ($res1->num_rows > 0) {

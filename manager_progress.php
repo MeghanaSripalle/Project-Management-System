@@ -18,7 +18,7 @@ if ($conn->connect_error) {
 $id = $_SESSION["manager_id"];
 
 // number of assigned projects
-$q = "SELECT * FROM Projects WHERE manager_id='$id'";
+$q = "SELECT DISTINCT manager_id FROM Assigned WHERE manager_id='$id'";
 $result = $conn->query($q);
 
 $projects = $result->num_rows;
@@ -176,12 +176,18 @@ function test_input($data) {
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">View the Progress of a Project</h5>
-                        <p>You can view the progress of any of your projects. The progress is up to date and ordered by the date.</p>
+                        <p>You can view the progress of the employees working on any of your projects. The progress is up to date and ordered by the date.</p>
                         <form method="post" action="manager_progress.php">
                             <div class="row mb-3">
                                 <label for="project_id" class="col-sm-2 col-form-label">Enter the Project ID: </label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control" name="project_id" id="project_id" placeholder="Enter Project ID" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="em_id" class="col-sm-2 col-form-label">Enter the Employee ID: </label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="em_id" id="em_id" placeholder="Enter Employee ID" required>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -202,16 +208,17 @@ function test_input($data) {
                         if(isset($_POST["progress"])){
          
                          $project_id = test_input($_POST["project_id"]);
+                         $e_id = test_input($_POST["em_id"]);
         
                        
-                         $view = "SELECT * FROM Updates,Projects WHERE Updates.project_id = Projects.project_id AND Projects.project_id='$project_id' AND Projects.manager_id='$id' ORDER BY Updates.update_date";
+                         $view = "SELECT * FROM Updates,Assigned WHERE Updates.project_id = Assigned.project_id AND Updates.emp_id = Assigned.emp_id AND Updates.project_id='$project_id' AND Updates.emp_id='$e_id' AND Assigned.manager_id='$id' ORDER BY Updates.update_date";
                          $result = $conn->query($view);
 
                          if($result->num_rows > 0) {
 
                             echo "<div class='card'>";
                             echo "<div class='card-body'>";
-                            echo "<h5 class='card-title'>Recent Updates (with Dates)</h5><div class='activity'>";
+                            echo "<h5 class='card-title'>Recent Updates of Employee with ID: ".$e_id." (with Dates) on Project ID: ".$project_id."</h5><div class='activity'>";
                             $arr = array("success","danger","primary","info","warning","muted");
                             while($row = $result->fetch_assoc()){
                                $i = rand(0,5);
